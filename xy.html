@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XY Vision-Cone Spin Simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --bg2: #12141a;
+    --bg3: #1a1d26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8e6df;
+    --text2: #8a8880;
+    --text3: #555450;
+    --accent: #5b9cf6;
+    --accent2: #e2637a;
+    --accent3: #3ecb99;
+    --accent4: #f0a842;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Fraunces', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    background: var(--bg);
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .header-ref {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text3);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  /* ── Layout ── */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr 220px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Left panel: controls ── */
+  .panel-left {
+    border-right: 1px solid var(--border);
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+  }
+
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+
+  .ctrl-group { display: flex; flex-direction: column; gap: 12px; }
+
+  .ctrl { display: flex; flex-direction: column; gap: 5px; }
+  .ctrl-row { display: flex; justify-content: space-between; align-items: center; }
+  .ctrl-name { color: var(--text2); font-size: 12px; }
+  .ctrl-eq { color: var(--text3); font-size: 11px; font-style: italic; font-family: var(--serif); }
+  .ctrl-val {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 44px;
+    text-align: right;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--bg3);
+    outline: none;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+  input[type=range]::-moz-range-thumb {
+    width: 12px; height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .divider { border: none; border-top: 1px solid var(--border); }
+
+  /* Buttons */
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 14px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  .btn.primary {
+    background: var(--accent);
+    color: #0b0c0f;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn.primary:hover { opacity: 0.85; }
+  .btn.active { border-color: var(--accent3); color: var(--accent3); }
+  .btn.danger { border-color: var(--accent2); color: var(--accent2); }
+  .btn.danger:hover { background: rgba(226,99,122,0.1); }
+
+  /* Select */
+  select {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg2);
+    color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 6px 10px;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+  }
+  select:hover { border-color: rgba(255,255,255,0.22); }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+  .stat-card.full { grid-column: 1/-1; }
+  .stat-val {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-val.accent { color: var(--accent); }
+  .stat-val.accent2 { color: var(--accent2); }
+  .stat-val.accent3 { color: var(--accent3); }
+  .stat-val.accent4 { color: var(--accent4); }
+  .stat-lbl { font-size: 10px; color: var(--text3); letter-spacing: 0.05em; }
+
+  /* ── Center: canvas area ── */
+  .panel-center {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+  }
+  .canvas-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .canvas-title {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .mode-pills { display: flex; gap: 6px; margin-left: auto; }
+  .pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pill.active { border-color: var(--accent); color: var(--accent); background: rgba(91,156,246,0.08); }
+  .pill:hover { color: var(--text2); }
+
+  #cv-main {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: crosshair;
+    display: block;
+    background: var(--bg);
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-line {
+    width: 16px; height: 2px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  /* ── Right panel: plots ── */
+  .panel-right {
+    border-left: 1px solid var(--border);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
+  .plot-title {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  canvas.plot {
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: block;
+    background: var(--bg);
+  }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text);
+    pointer-events: none;
+    display: none;
+    z-index: 100;
+    line-height: 1.8;
+  }
+
+  /* ── Phase diagram overlay ── */
+  .phase-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+  .phase-ordered { background: rgba(62,203,153,0.15); color: var(--accent3); border: 1px solid rgba(62,203,153,0.3); }
+  .phase-critical { background: rgba(240,168,66,0.15); color: var(--accent4); border: 1px solid rgba(240,168,66,0.3); }
+  .phase-disordered { background: rgba(226,99,122,0.15); color: var(--accent2); border: 1px solid rgba(226,99,122,0.3); }
+
+  .info-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--text2); font-weight: 500; }
+
+  /* ── Sweep progress bar ── */
+  .progress-bar {
+    height: 2px;
+    background: var(--bg3);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>XY <em>Vision-Cone</em> Spin Simulator</h1>
+  <span class="header-sub">Nonreciprocal interactions · Glauber Monte Carlo</span>
+  <span class="header-ref">Shi, Moessner, Alert, Bukov (2025)</span>
+</header>
+
+<div class="app">
+
+  <!-- ═══ LEFT PANEL ═══ -->
+  <div class="panel-left">
+
+    <div>
+      <div class="section-label">Simulation Controls</div>
+      <div class="btn-group">
+        <button class="btn primary" id="btn-run">▶ Run</button>
+        <button class="btn danger" id="btn-reset">↺ Reset</button>
+        <button class="btn" id="btn-step">Step ×10</button>
+      </div>
+      <div class="progress-bar" style="margin-top:10px">
+        <div class="progress-fill" id="prog"></div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <div class="section-label">Physical Parameters</div>
+      <div class="ctrl-group">
+
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-name">Temperature</span>
+            <span class="ctrl-eq">T/J</span>
+            <span class="ctrl-val" id="ov-T">0.50</span>
+          </div>
+          <input type="range" id="sl-T" min="0.05" max="2.5" step="0.05" value="0.50">
+        </div>
+
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-name">Vision cone</span>
+            <span class="ctrl-eq">Ψ/π</span>
+            <span class="ctrl-val" id="ov-psi">0.85</span>
+          </div>
+          <input type="range" id="sl-psi" min="0.05" max="1.00" step="0.05" value="0.85">
+        </div>
+
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-name">Coupling</span>
+            <span class="ctrl-eq">J</span>
+            <span class="ctrl-val" id="ov-J">1.0</span>
+          </div>
+          <input type="range" id="sl-J" min="0.1" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-name">Grid size</span>
+            <span class="ctrl-eq">L²</span>
+            <span class="ctrl-val" id="ov-L">20</span>
+          </div>
+          <input type="range" id="sl-L" min="8" max="32" step="2" value="20">
+        </div>
+
+        <div class="ctrl">
+          <div class="ctrl-row">
+            <span class="ctrl-name">MC step size</span>
+            <span class="ctrl-eq">Δθ</span>
+            <span class="ctrl-val" id="ov-delta">0.30</span>
+          </div>
+          <input type="range" id="sl-delta" min="0.05" max="1.0" step="0.05" value="0.30">
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <div class="section-label">Initial Configuration</div>
+      <select id="sel-init">
+        <option value="random">Random (disordered)</option>
+        <option value="ordered" selected>Ordered (θᵢ = 0)</option>
+        <option value="stripe">Stripe (alternating π)</option>
+        <option value="vortex">Vortex</option>
+      </select>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <div class="section-label">Visualisation</div>
+      <div class="btn-group" style="flex-direction:column; gap:8px;">
+        <div class="btn-group">
+          <button class="pill active" id="pill-spins" data-v="spins">Arrows</button>
+          <button class="pill" id="pill-phase" data-v="phase">Phase map</button>
+          <button class="pill" id="pill-energy" data-v="energy">Energy</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn active" id="btn-cones" style="font-size:11px">Vision cones</button>
+          <button class="btn" id="btn-bonds" style="font-size:11px">NR bonds</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div>
+      <div class="section-label">Observables</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val accent" id="sv-mag">—</div>
+          <div class="stat-lbl">Magnetization ⟨m⟩</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val accent4" id="sv-cv">—</div>
+          <div class="stat-lbl">Specific heat Cv</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val accent2" id="sv-nr">—</div>
+          <div class="stat-lbl">NR bond fraction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val accent3" id="sv-sweep">0</div>
+          <div class="stat-lbl">MC sweeps</div>
+        </div>
+        <div class="stat-card full">
+          <div class="stat-val" id="sv-energy">—</div>
+          <div class="stat-lbl">Energy ⟨H_SS⟩ / N</div>
+        </div>
+        <div class="stat-card full" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="stat-lbl" style="margin-bottom:4px">Phase estimate</div>
+            <div id="sv-phase" class="phase-badge phase-ordered">ORDERED</div>
+          </div>
+          <div style="text-align:right">
+            <div class="stat-lbl">Tc ≈ 0.79 J</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">Ψ = 0.85π</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ CENTER: Main canvas ═══ -->
+  <div class="panel-center">
+    <div class="canvas-header">
+      <span class="canvas-title">Spin Lattice</span>
+      <span id="cv-info" style="font-size:11px;color:var(--text3)">hover to inspect</span>
+    </div>
+    <canvas id="cv-main"></canvas>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-line" style="background:var(--accent)"></div> spin direction</div>
+      <div class="legend-item"><div class="legend-line" style="background:var(--accent2)"></div> nonreciprocal bond</div>
+      <div class="legend-item"><div class="legend-line" style="background:var(--accent3)"></div> reciprocal bond</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(91,156,246,0.35)"></div> vision cone</div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL: plots ═══ -->
+  <div class="panel-right">
+
+    <div>
+      <div class="plot-title">Magnetization vs time</div>
+      <canvas class="plot" id="cv-mag" width="188" height="100"></canvas>
+    </div>
+
+    <div>
+      <div class="plot-title">Energy vs time</div>
+      <canvas class="plot" id="cv-energy" width="188" height="80"></canvas>
+    </div>
+
+    <div>
+      <div class="plot-title">Autocorrelation C(τ)</div>
+      <canvas class="plot" id="cv-acf" width="188" height="80"></canvas>
+    </div>
+
+    <div>
+      <div class="plot-title">Angle distribution</div>
+      <canvas class="plot" id="cv-hist" width="188" height="80"></canvas>
+    </div>
+
+    <div class="info-box">
+      <strong>Model:</strong> Eq.(1) from paper<br>
+      θ̇ᵢ = −Σⱼ Jᵢⱼ(θᵢ) sin(θᵢ−θⱼ) + √(2T)ηᵢ<br><br>
+      <strong>Jᵢⱼ(θᵢ):</strong> J if j∈cone(i), else 0<br>
+      <strong>NR:</strong> Jᵢⱼ≠Jⱼᵢ when cones differ<br><br>
+      <strong>MC:</strong> Constrained Glauber w/ auxiliary spins φᵢ = θᵢ + π (mirror constraint)
+    </div>
+
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+(function(){
+const TWO_PI = 2*Math.PI;
+const Tc_ref = 0.79;
+
+// ── State ──
+let L=20, J=1.0, T=0.5, PSI=0.85*Math.PI, DELTA=0.30;
+let theta=[], running=false, sweep=0;
+let magHist=[], energyHist=[];
+let animId=null;
+let showCones=true, showBonds=true;
+let viewMode='spins';
+let hoverSpin=-1;
+
+// ── DOM ──
+const cvMain = document.getElementById('cv-main');
+const ctx = cvMain.getContext('2d');
+
+// ── Param sync ──
+function syncParams(){
+  L = parseInt(document.getElementById('sl-L').value);
+  J = parseFloat(document.getElementById('sl-J').value);
+  T = parseFloat(document.getElementById('sl-T').value);
+  PSI = parseFloat(document.getElementById('sl-psi').value)*Math.PI;
+  DELTA = parseFloat(document.getElementById('sl-delta').value);
+  document.getElementById('ov-T').textContent = T.toFixed(2);
+  document.getElementById('ov-psi').textContent = parseFloat(document.getElementById('sl-psi').value).toFixed(2);
+  document.getElementById('ov-J').textContent = J.toFixed(1);
+  document.getElementById('ov-L').textContent = L;
+  document.getElementById('ov-delta').textContent = DELTA.toFixed(2);
+}
+
+// ── Lattice helpers ──
+function idx(r,c){ return ((r%L+L)%L)*L+((c%L+L)%L); }
+function row(i){ return Math.floor(i/L); }
+function col(i){ return i%L; }
+function neighbors(i){ let r=row(i),c=col(i); return [idx(r-1,c),idx(r+1,c),idx(r,c-1),idx(r,c+1)]; }
+
+function angleDiff(a,b){ let d=a-b; return Math.atan2(Math.sin(d),Math.cos(d)); }
+
+function bondAngle(i,j){
+  let dr=row(j)-row(i), dc=col(j)-col(i);
+  if(dr>L/2)dr-=L; if(dr<-L/2)dr+=L;
+  if(dc>L/2)dc-=L; if(dc<-L/2)dc+=L;
+  return Math.atan2(dr,dc);
+}
+
+function inCone(spin_angle, bond_angle){
+  return Math.abs(angleDiff(spin_angle,bond_angle))<=PSI;
+}
+
+function Jij(i,j){ return inCone(theta[i], bondAngle(i,j)) ? J : 0; }
+
+// ── Init ──
+function init(){
+  syncParams();
+  const mode = document.getElementById('sel-init').value;
+  theta = [];
+  for(let i=0;i<L*L;i++){
+    let r=row(i), c=col(i);
+    if(mode==='random') theta.push(Math.random()*TWO_PI);
+    else if(mode==='ordered') theta.push(0);
+    else if(mode==='stripe') theta.push((r+c)%2===0 ? 0 : Math.PI);
+    else if(mode==='vortex'){
+      let x=c-L/2+0.5, y=r-L/2+0.5;
+      theta.push(Math.atan2(y,x)+Math.PI/2);
+    }
+  }
+  sweep=0; magHist=[]; energyHist=[];
+  document.getElementById('sv-sweep').textContent='0';
+  document.getElementById('prog').style.width='0%';
+  resizeCanvas();
+  render();
+}
+
+// ── Monte Carlo ──
+function siteEnergy(i, th_i){
+  let old=theta[i]; theta[i]=th_i;
+  let e=0;
+  for(let j of neighbors(i)){
+    e -= Jij(i,j)*Math.cos(th_i-theta[j]);
+    e -= Jij(j,i)*Math.cos(theta[j]-th_i);
+  }
+  theta[i]=old;
+  return e;
+}
+
+function glauberSweep(n){
+  let N=L*L;
+  for(let k=0;k<n*N;k++){
+    let i=Math.floor(Math.random()*N);
+    let dth=(Math.random()-0.5)*2*DELTA;
+    let th_new=theta[i]+dth;
+    let dH=siteEnergy(i,th_new)-siteEnergy(i,theta[i]);
+    let w=0.5*(1-Math.tanh(dH/(2*T)));
+    if(Math.random()<w) theta[i]=th_new;
+  }
+  sweep+=n;
+}
+
+// ── Observables ──
+function magnetization(){
+  let sx=0,sy=0;
+  for(let t of theta){sx+=Math.cos(t);sy+=Math.sin(t);}
+  return Math.sqrt(sx*sx+sy*sy)/(L*L);
+}
+
+function totalEnergy(){
+  let E=0;
+  for(let i=0;i<L*L;i++){
+    for(let j of neighbors(i)){
+      if(j>i) E-=(Jij(i,j)+Jij(j,i))*Math.cos(theta[i]-theta[j]);
+    }
+  }
+  return E/(L*L);
+}
+
+function nrFraction(){
+  let nr=0,tot=0;
+  for(let i=0;i<L*L;i++){
+    for(let j of neighbors(i)){
+      if(j>i){
+        if(Math.abs(Jij(i,j)-Jij(j,i))>0.01)nr++;
+        tot++;
+      }
+    }
+  }
+  return tot>0?nr/tot:0;
+}
+
+// ── Canvas sizing ──
+function resizeCanvas(){
+  const panel = document.querySelector('.panel-center');
+  const w = panel.clientWidth - 40;
+  const h = window.innerHeight - 180;
+  const s = Math.min(w, h);
+  cvMain.width = s;
+  cvMain.height = s;
+}
+
+// ── Color helpers ──
+function spinColor(th){
+  let h=(((th%TWO_PI)+TWO_PI)%TWO_PI/TWO_PI)*360;
+  return `hsl(${Math.round(h)},75%,62%)`;
+}
+function phaseColor(th){
+  let h=(((th%TWO_PI)+TWO_PI)%TWO_PI/TWO_PI)*360;
+  return `hsl(${Math.round(h)},85%,55%)`;
+}
+
+// ── Main render ──
+function render(){
+  const W=cvMain.width, H=cvMain.height;
+  const cell=W/L;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0b0c0f';
+  ctx.fillRect(0,0,W,H);
+
+  for(let i=0;i<L*L;i++){
+    let r=row(i), c=col(i);
+    let x=(c+0.5)*cell, y=(r+0.5)*cell;
+    let th=theta[i];
+
+    // vision cone
+    if(showCones){
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.arc(x,y,cell*0.46, th-PSI, th+PSI);
+      ctx.closePath();
+      ctx.fillStyle='rgba(91,156,246,0.055)';
+      ctx.fill();
+      ctx.strokeStyle='rgba(91,156,246,0.12)';
+      ctx.lineWidth=0.5;
+      ctx.stroke();
+    }
+
+    // energy-based background
+    if(viewMode==='energy'){
+      let e=0;
+      for(let j of neighbors(i)) e-=Jij(i,j)*Math.cos(th-theta[j]);
+      let t=Math.max(-4,Math.min(4,e))/4;
+      let r2=t>0?Math.round(t*200):0, g2=0, b2=t<0?Math.round(-t*200):0;
+      ctx.fillStyle=`rgba(${r2},${g2},${b2},0.35)`;
+      ctx.fillRect(c*cell,r*cell,cell,cell);
+    }
+  }
+
+  // bonds
+  if(showBonds){
+    ctx.lineWidth=0.7;
+    for(let i=0;i<L*L;i++){
+      let r=row(i), c=col(i);
+      let x=(c+0.5)*cell, y=(r+0.5)*cell;
+      for(let j of neighbors(i)){
+        if(j>i){
+          let ji=Jij(i,j), jji=Jij(j,i);
+          if(ji===0 && jji===0) continue;
+          let rj=row(j), cj=col(j);
+          let xj=(cj+0.5)*cell, yj=(rj+0.5)*cell;
+          let dx=xj-x, dy=yj-y;
+          if(Math.abs(dx)>cell*1.5){dx=dx>0?dx-W:dx+W;}
+          if(Math.abs(dy)>cell*1.5){dy=dy>0?dy-H:dy+H;}
+          let mx=x+dx*0.5, my=y+dy*0.5;
+          let isNR=Math.abs(ji-jji)>0.01;
+          ctx.strokeStyle=isNR?'rgba(226,99,122,0.4)':'rgba(62,203,153,0.3)';
+          ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(mx,my); ctx.stroke();
+        }
+      }
+    }
+  }
+
+  // spins
+  for(let i=0;i<L*L;i++){
+    let r=row(i), c=col(i);
+    let x=(c+0.5)*cell, y=(r+0.5)*cell;
+    let th=theta[i];
+    let isHover=(i===hoverSpin);
+    let rad=cell*0.38;
+
+    if(viewMode==='phase'){
+      ctx.fillStyle=phaseColor(th);
+      ctx.beginPath();
+      ctx.arc(x,y,cell*0.3,0,TWO_PI);
+      ctx.fill();
+    } else {
+      let col2=isHover?'#ffffff':spinColor(th);
+      ctx.strokeStyle=col2;
+      ctx.fillStyle=col2;
+      ctx.lineWidth=isHover?2:1.3;
+      let ex=x+rad*Math.cos(th), ey=y+rad*Math.sin(th);
+      let sx=x-rad*0.45*Math.cos(th), sy=y-rad*0.45*Math.sin(th);
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+      let aw=cell*0.11;
+      ctx.beginPath();
+      ctx.moveTo(ex,ey);
+      ctx.lineTo(ex-aw*Math.cos(th-0.55), ey-aw*Math.sin(th-0.55));
+      ctx.lineTo(ex-aw*Math.cos(th+0.55), ey-aw*Math.sin(th+0.55));
+      ctx.closePath(); ctx.fill();
+    }
+
+    if(isHover){
+      ctx.strokeStyle='rgba(255,255,255,0.25)';
+      ctx.lineWidth=0.7;
+      ctx.strokeRect(c*cell+1, r*cell+1, cell-2, cell-2);
+    }
+  }
+
+  updateStats();
+  renderMagPlot();
+  renderEnergyPlot();
+  renderACF();
+  renderHist();
+}
+
+// ── Stats ──
+function updateStats(){
+  let m=magnetization();
+  let e=totalEnergy();
+  let nr=nrFraction();
+
+  magHist.push(m);
+  energyHist.push(e);
+  if(magHist.length>400){magHist.shift(); energyHist.shift();}
+
+  document.getElementById('sv-mag').textContent=m.toFixed(4);
+  document.getElementById('sv-energy').textContent=e.toFixed(4);
+  document.getElementById('sv-nr').textContent=(nr*100).toFixed(1)+'%';
+  document.getElementById('sv-sweep').textContent=sweep;
+
+  let arr=magHist.slice(-40);
+  let mn=arr.reduce((a,b)=>a+b,0)/arr.length;
+  let vr=arr.reduce((a,b)=>a+(b-mn)**2,0)/arr.length;
+  let Cv=vr/(T*T+1e-9)/(L*L);
+  document.getElementById('sv-cv').textContent=Cv.toFixed(4);
+
+  let prog=Math.min(100, sweep/500*100);
+  document.getElementById('prog').style.width=prog+'%';
+
+  let phaseBadge=document.getElementById('sv-phase');
+  if(m>0.5){
+    phaseBadge.className='phase-badge phase-ordered';
+    phaseBadge.textContent='ORDERED';
+  } else if(m>0.25){
+    phaseBadge.className='phase-badge phase-critical';
+    phaseBadge.textContent='CRITICAL';
+  } else {
+    phaseBadge.className='phase-badge phase-disordered';
+    phaseBadge.textContent='DISORDERED';
+  }
+}
+
+// ── Side plots ──
+function plotBase(cv, pad){
+  const ctx2=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  ctx2.clearRect(0,0,W,H);
+  ctx2.fillStyle='#0b0c0f';
+  ctx2.fillRect(0,0,W,H);
+  ctx2.strokeStyle='rgba(255,255,255,0.05)';
+  ctx2.lineWidth=0.5;
+  for(let g=0;g<=4;g++){
+    let y=pad+(H-pad*2)*(1-g/4);
+    ctx2.beginPath(); ctx2.moveTo(pad,y); ctx2.lineTo(W-pad,y); ctx2.stroke();
+  }
+  return {ctx2,W,H};
+}
+
+function renderMagPlot(){
+  let {ctx2,W,H}=plotBase(document.getElementById('cv-mag'),6);
+  if(magHist.length<2) return;
+  let pad=6, pw=W-pad*2, ph=H-pad*2;
+  ctx2.strokeStyle='#5b9cf6'; ctx2.lineWidth=1.5;
+  ctx2.beginPath();
+  for(let k=0;k<magHist.length;k++){
+    let x=pad+pw*k/(magHist.length-1);
+    let y=pad+ph*(1-magHist[k]);
+    k===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  }
+  ctx2.stroke();
+  // Tc line
+  ctx2.strokeStyle='rgba(240,168,66,0.5)'; ctx2.lineWidth=0.7; ctx2.setLineDash([3,3]);
+  let y0=pad+ph*(1-0); ctx2.beginPath(); ctx2.moveTo(pad,y0); ctx2.lineTo(W-pad,y0); ctx2.stroke();
+  ctx2.setLineDash([]);
+  ctx2.fillStyle='rgba(255,255,255,0.35)'; ctx2.font='9px monospace';
+  ctx2.fillText('⟨m⟩',pad+2,pad+9); ctx2.fillText('1.0',pad,pad+9); ctx2.fillText('0',pad,H-pad+1);
+}
+
+function renderEnergyPlot(){
+  let {ctx2,W,H}=plotBase(document.getElementById('cv-energy'),6);
+  if(energyHist.length<2) return;
+  let pad=6, pw=W-pad*2, ph=H-pad*2;
+  let mn=Math.min(...energyHist), mx=Math.max(...energyHist);
+  let span=mx-mn||1;
+  ctx2.strokeStyle='#f0a842'; ctx2.lineWidth=1.5;
+  ctx2.beginPath();
+  for(let k=0;k<energyHist.length;k++){
+    let x=pad+pw*k/(energyHist.length-1);
+    let y=pad+ph*(1-(energyHist[k]-mn)/span);
+    k===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  }
+  ctx2.stroke();
+  ctx2.fillStyle='rgba(255,255,255,0.35)'; ctx2.font='9px monospace';
+  ctx2.fillText('E/N',pad+2,pad+9);
+}
+
+function renderACF(){
+  let cv=document.getElementById('cv-acf');
+  let {ctx2,W,H}=plotBase(cv,6);
+  let n=Math.min(magHist.length,60); if(n<6) return;
+  let data=magHist.slice(-n);
+  let mean=data.reduce((a,b)=>a+b,0)/n;
+  let v0=data.reduce((a,b)=>a+(b-mean)**2,0)/n; if(v0<1e-12) return;
+  let maxlag=Math.min(25,n-2);
+  let acf=[];
+  for(let lag=0;lag<=maxlag;lag++){
+    let c=0; for(let k=0;k<n-lag;k++) c+=(data[k]-mean)*(data[k+lag]-mean);
+    acf.push(c/((n-lag)*v0));
+  }
+  let pad=6, pw=W-pad*2, ph=H-pad*2;
+  let mid=pad+ph*0.5;
+  ctx2.strokeStyle='rgba(255,255,255,0.06)'; ctx2.lineWidth=0.5;
+  ctx2.beginPath(); ctx2.moveTo(pad,mid); ctx2.lineTo(W-pad,mid); ctx2.stroke();
+  ctx2.strokeStyle='#e2637a'; ctx2.lineWidth=1.5;
+  ctx2.beginPath();
+  for(let lag=0;lag<acf.length;lag++){
+    let x=pad+pw*lag/maxlag;
+    let y=mid-ph*0.5*acf[lag];
+    lag===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  }
+  ctx2.stroke();
+  ctx2.fillStyle='rgba(255,255,255,0.35)'; ctx2.font='9px monospace';
+  ctx2.fillText('C(τ)',pad+2,pad+9);
+}
+
+function renderHist(){
+  let cv=document.getElementById('cv-hist');
+  let {ctx2,W,H}=plotBase(cv,6);
+  let bins=36, counts=new Array(bins).fill(0);
+  for(let t of theta){
+    let b=Math.floor(((t%TWO_PI+TWO_PI)%TWO_PI)/TWO_PI*bins);
+    counts[Math.min(b,bins-1)]++;
+  }
+  let mx=Math.max(...counts)||1;
+  let pad=6, pw=W-pad*2, ph=H-pad*2;
+  let bw=pw/bins;
+  for(let b=0;b<bins;b++){
+    let hue=Math.round(b/bins*360);
+    let frac=counts[b]/mx;
+    ctx2.fillStyle=`hsl(${hue},70%,55%)`;
+    let bh=ph*frac;
+    ctx2.fillRect(pad+b*bw, pad+ph-bh, bw-0.5, bh);
+  }
+  ctx2.fillStyle='rgba(255,255,255,0.35)'; ctx2.font='9px monospace';
+  ctx2.fillText('P(θ)',pad+2,pad+9);
+}
+
+// ── Animation loop ──
+function loop(){
+  syncParams();
+  glauberSweep(1);
+  render();
+  if(running) animId=requestAnimationFrame(loop);
+}
+
+// ── Event listeners ──
+document.getElementById('btn-run').addEventListener('click',function(){
+  running=!running;
+  this.textContent=running?'⏸ Pause':'▶ Run';
+  this.className=running?'btn danger':'btn primary';
+  if(running) loop();
+  else if(animId){cancelAnimationFrame(animId);animId=null;}
+});
+
+document.getElementById('btn-reset').addEventListener('click',function(){
+  running=false; cancelAnimationFrame(animId); animId=null;
+  document.getElementById('btn-run').textContent='▶ Run';
+  document.getElementById('btn-run').className='btn primary';
+  init();
+});
+
+document.getElementById('btn-step').addEventListener('click',function(){
+  if(!running){syncParams(); glauberSweep(10); render();}
+});
+
+['sl-T','sl-psi','sl-J','sl-delta'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',function(){syncParams(); if(!running) render();});
+});
+
+document.getElementById('sl-L').addEventListener('input',function(){
+  if(!running){syncParams(); init();}
+  else document.getElementById('ov-L').textContent=this.value;
+});
+
+document.getElementById('sel-init').addEventListener('change',function(){
+  if(!running) init();
+});
+
+document.getElementById('btn-cones').addEventListener('click',function(){
+  showCones=!showCones;
+  this.className=showCones?'btn active':'btn';
+  if(!running) render();
+});
+
+document.getElementById('btn-bonds').addEventListener('click',function(){
+  showBonds=!showBonds;
+  this.className=showBonds?'btn active':'btn';
+  if(!running) render();
+});
+
+document.querySelectorAll('.pill').forEach(p=>{
+  p.addEventListener('click',function(){
+    document.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+    viewMode=this.dataset.v;
+    if(!running) render();
+  });
+});
+
+// Hover inspection
+cvMain.addEventListener('mousemove',function(e){
+  let rect=cvMain.getBoundingClientRect();
+  let mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  let cell=cvMain.width/L;
+  let c=Math.floor(mx/cell), r=Math.floor(my/cell);
+  if(c>=0&&c<L&&r>=0&&r<L){
+    let i=r*L+c;
+    hoverSpin=i;
+    let nb=neighbors(i);
+    let nr_count=nb.filter(j=>Math.abs(Jij(i,j)-Jij(j,i))>0.01).length;
+    let tt=document.getElementById('tooltip');
+    tt.style.display='block';
+    tt.style.left=(e.clientX+14)+'px';
+    tt.style.top=(e.clientY-10)+'px';
+    let deg=(theta[i]*180/Math.PI%360+360)%360;
+    tt.innerHTML=`<b>spin [${r},${c}]</b><br>θ = ${deg.toFixed(1)}°<br>NR bonds: ${nr_count}/4`;
+    document.getElementById('cv-info').textContent=`[${r},${c}]  θ=${deg.toFixed(1)}°`;
+    if(!running) render();
+  }
+});
+
+cvMain.addEventListener('mouseleave',function(){
+  hoverSpin=-1;
+  document.getElementById('tooltip').style.display='none';
+  document.getElementById('cv-info').textContent='hover to inspect';
+  if(!running) render();
+});
+
+window.addEventListener('resize',function(){
+  resizeCanvas();
+  render();
+});
+
+// keyboard shortcuts
+document.addEventListener('keydown',function(e){
+  if(e.code==='Space'){e.preventDefault(); document.getElementById('btn-run').click();}
+  if(e.code==='KeyR') document.getElementById('btn-reset').click();
+  if(e.code==='KeyS') document.getElementById('btn-step').click();
+});
+
+// ── Start ──
+resizeCanvas();
+init();
+
+})();
+</script>
+</body>
+</html>
