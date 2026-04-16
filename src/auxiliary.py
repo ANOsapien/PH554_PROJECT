@@ -187,8 +187,8 @@ def run_simulation(L, T, theta_deg, init="disordered"):
     Psi   = np.deg2rad(theta_deg) / 2.0
     Delta = 0.5  # same as selfish.py
 
-    burn_steps   = 3 * (L ** 4)
-    sample_steps = 7 * (L ** 4)
+    burn_steps   = int(0.3 * (20 * L ** 4 ))
+    sample_steps = int(0.7 * (20 * L ** 4 ))
 
     # --- init ---
     if init == "disordered":

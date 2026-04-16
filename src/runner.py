@@ -25,9 +25,10 @@ MODE = args.mode
 # Config
 # ----------------------------
 
-L = 32
-T_list = np.linspace(0.3, 2.5, 6)
-cone_list = np.linspace(0, 360, 7)
+L = 50
+T_list = np.linspace(0.02, 1, 20)
+cone_list = [306]
+N_RUNS = 1
 
 OUTPUT_DIR = f"{MODE}_results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -52,17 +53,27 @@ for theta in cone_list:
     for T in T_list:
         print(f"[{MODE}] Running: theta={theta:.1f}, T={T:.2f}")
 
-        out = run_simulation(
-            L=L,
-            T=T,
-            theta_deg=theta,
-            init="disordered"
-        )
+        m_vals = []
+        epr_vals = []
+
+        for run in range(N_RUNS):
+            out = run_simulation(
+                L=L,
+                T=T,
+                theta_deg=theta,
+                init="disordered"
+            )
+
+            m_vals.append(out["m"])
+            epr_vals.append(out["EPR"])
+
+        m_avg = float(np.mean(m_vals))
+        epr_avg = float(np.mean(epr_vals))
 
         results[theta_key].append({
             "T": float(T),
-            "m": float(out["m"]),
-            "EPR": float(out["EPR"])
+            "m": m_avg,
+            "EPR": epr_avg
         })
 
 # ----------------------------

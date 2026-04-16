@@ -202,7 +202,7 @@ def run_simulation(L=64, T=1.0, theta_deg=180,
     phi = initialize_lattice(L, init)
 
     if steps is None:
-        steps = int(10 * L**4)
+        steps = int(20 * L ** 4)
 
     thermal_steps = int(0.3 * steps)
 
