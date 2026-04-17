@@ -61,13 +61,17 @@ if MODE == "selfish" and CONE_ASSIGN != "single":
 # Config
 # ----------------------------
 
-L      = 50
-T_list = np.linspace(0.5, 0.65, 6)
+L      = 100
+T_low  = np.linspace(0.1, 0.67, 20, endpoint=False)
+T_mid  = np.linspace(0.67, 0.9, 50, endpoint=False)  # dense region
+T_high = np.linspace(0.9, 1.0, 20)
+
+T_list = np.concatenate([T_low, T_mid, T_high])
 
 # Primary cone sweep list
 cone_list = [306]
 
-N_RUNS = 1
+N_RUNS = 10
 
 # Label for output directory reflects the cone assignment scheme
 if CONE_ASSIGN != "single":

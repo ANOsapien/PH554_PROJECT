@@ -25,8 +25,12 @@ MODE = args.mode
 # Config
 # ----------------------------
 
-L = 50
-T_list = np.linspace(0.75, 0.90, 50)
+L = 100
+T_low  = np.linspace(0.1, 0.67, 20, endpoint=False)
+T_mid  = np.linspace(0.67, 0.9, 50, endpoint=False)  # dense region
+T_high = np.linspace(0.9, 1.0, 20)
+
+T_list = np.concatenate([T_low, T_mid, T_high])
 cone_list = [306]
 N_RUNS = 10
 

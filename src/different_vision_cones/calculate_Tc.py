@@ -50,7 +50,7 @@ def plot_results(T, m, m_smooth, dm_dT, Tc):
 
 
 if __name__ == "__main__":
-    with open("data.json", "r") as f:
+    with open("auxiliary_results_rows_cone/results_auxiliary.json", "r") as f:
         json_data = json.load(f)
 
     Tc, T, m, m_smooth, dm_dT = compute_Tc_from_magnetization(json_data)

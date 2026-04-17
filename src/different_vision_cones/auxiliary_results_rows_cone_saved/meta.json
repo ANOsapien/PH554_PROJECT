@@ -1,8 +1,0 @@
-{
-  "mode": "auxiliary",
-  "cone_assign": "rows",
-  "theta_deg2": 90.0,
-  "seed": null,
-  "L": 50,
-  "N_RUNS": 2
-}
