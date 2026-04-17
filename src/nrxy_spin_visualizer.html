@@ -1,0 +1,519 @@
+
+<style>
+  body { margin: 0; }
+  canvas { display: block; }
+  .ctrl { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--color-text-secondary); }
+  .ctrl label { width: 130px; flex-shrink: 0; }
+  .ctrl input[type=range] { flex: 1; }
+  .ctrl span { width: 52px; text-align: right; font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .stats { display: flex; gap: 12px; margin: 10px 0; }
+  .stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 14px; flex: 1; }
+  .stat .lbl { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
+  .stat .val { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+  .btns { display: flex; gap: 8px; margin-bottom: 12px; }
+  button { cursor: pointer; font-size: 13px; padding: 6px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); }
+  button:hover { background: var(--color-background-secondary); }
+  button.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+  .cone-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .cone-tab { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; }
+  .cone-tab.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+  h2 { font-size: 15px; font-weight: 500; margin: 0 0 12px; color: var(--color-text-primary); }
+
+  :root {
+  --color-background-primary: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-info: #2563eb;
+
+  --color-text-primary: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-text-info: #ffffff;
+
+  --color-border-secondary: #334155;
+  --color-border-tertiary: #475569;
+  --color-border-info: #3b82f6;
+
+  --border-radius-md: 8px;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  max-width: 520px;     /* prevents it from becoming too large */
+  height: auto;
+  margin: 0 auto;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-tertiary);
+}
+
+/* Controls */
+.ctrl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.ctrl label {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.ctrl input[type=range] {
+  flex: 1;
+}
+
+.ctrl span {
+  width: 52px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.stat {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 8px 14px;
+  flex: 1;
+}
+
+.stat .lbl {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: 2px;
+}
+
+.stat .val {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Buttons */
+.btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+button {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background: var(--color-background-secondary);
+}
+
+button.active {
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border-color: var(--color-border-info);
+}
+
+/* Cone Tabs */
+.cone-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.cone-tab {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cone-tab:hover {
+  background: var(--color-background-secondary);
+}
+
+.cone-tab.active {
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border-color: var(--color-border-info);
+}
+
+/* Headings */
+h2 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+</style>
+
+<h2 class="sr-only">NRXY spin lattice visualizer — interactive Monte Carlo simulation</h2>
+
+<div style="padding: 1rem 0;">
+  <h2>NRXY spin lattice</h2>
+
+  <!-- <div class="cone-tabs">
+    <div class="cone-tab active" data-cone="360">360° (XY model)</div>
+    <div class="cone-tab" data-cone="120">306°</div>
+    <div class="cone-tab" data-cone="270">270°</div>
+    <div class="cone-tab" data-cone="180">180°</div>
+        
+    <div class="cone-tab" data-cone="90">90° (selfish)</div>
+  </div> -->
+
+  <div class="ctrl">
+    <label>Temperature T</label>
+    <input type="range" id="sl-T" min="0.1" max="2.0" step="0.01" value="0.80">
+    <span id="lbl-T">0.80</span>
+  </div>
+  <div class="ctrl">
+    <label>Speed (steps/frame)</label>
+    <input type="range" id="sl-spd" min="1" max="200" step="1" value="40">
+    <span id="lbl-spd">40</span>
+  </div>
+
+  <div class="ctrl">
+  <label>Vision cone (°)</label>
+  <input type="range" id="sl-cone" min="0" max="360" step="1" value="360">
+  <span id="lbl-cone">360°</span>
+</div>
+
+  <div class="btns">
+    <button id="btn-play">Pause</button>
+    <button id="btn-init-rand">Randomize</button>
+    <button id="btn-init-ord">Order</button>
+    <button id="btn-colormode" class="active">Color: angle</button>
+  </div>
+
+  <canvas id="cv" style="width:100%; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary);"></canvas>
+
+  <div class="stats">
+    <div class="stat"><div class="lbl">Magnetization |m|</div><div class="val" id="st-m">–</div></div>
+    <div class="stat"><div class="lbl">mx</div><div class="val" id="st-mx">–</div></div>
+    <div class="stat"><div class="lbl">my</div><div class="val" id="st-my">–</div></div>
+    <div class="stat"><div class="lbl">MC steps (×N)</div><div class="val" id="st-steps">0</div></div>
+  </div>
+
+  <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">
+    Color encodes spin angle θ. Vision cone Ψ = θ_cone/2. Glauber MC with Δ = 0.5 rad.
+  </div>
+</div>
+
+<script>
+const L = 100;
+const N = L * L;
+
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+
+/* ----------------------------
+   Responsive canvas
+---------------------------- */
+function resizeCanvas() {
+  const size = Math.min(window.innerWidth * 0.9, 520);
+  canvas.width = size;
+  canvas.height = size;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getCellSize() {
+  return {
+    cellW: canvas.width / L,
+    cellH: canvas.height / L
+  };
+}
+
+/* ----------------------------
+   State
+---------------------------- */
+let theta = new Float32Array(N);
+
+let T = 0.80;
+let cone_deg = 360;
+let Psi = Math.PI;
+
+let stepsPerFrame = 40;
+let running = true;
+let totalMCSweeps = 0;
+let colorMode = 'angle';
+
+const dx = [1, 0, -1, 0];
+const dy = [0, 1, 0, -1];
+const psi_dir = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
+
+/* ----------------------------
+   Helpers
+---------------------------- */
+function angleDiff(a, b) {
+  let d = a - b;
+  while (d > Math.PI) d -= 2*Math.PI;
+  while (d < -Math.PI) d += 2*Math.PI;
+  return d;
+}
+
+function inCone(th, dir, psi) {
+  return Math.abs(angleDiff(dir, th)) <= psi;
+}
+
+function idx(x, y) {
+  return ((x % L + L) % L) * L + ((y % L + L) % L);
+}
+
+/* ----------------------------
+   Initialization
+---------------------------- */
+function initRandom() {
+  for (let i = 0; i < N; i++) {
+    theta[i] = Math.random() * 2 * Math.PI;
+  }
+  totalMCSweeps = 0;
+}
+
+function initOrdered() {
+  for (let i = 0; i < N; i++) {
+    theta[i] = 0;
+  }
+  totalMCSweeps = 0;
+}
+
+initRandom();
+
+/* ----------------------------
+   Energy delta
+---------------------------- */
+function deltaH(x, y, tNew) {
+  const tOld = theta[idx(x, y)];
+  const phi_old = tOld - Math.PI;
+
+  let dH = 0;
+
+  for (let k = 0; k < 4; k++) {
+    const nx = (x + dx[k] + L) % L;
+    const ny = (y + dy[k] + L) % L;
+
+    const tj = theta[idx(nx, ny)];
+    const phi_j = tj - Math.PI;
+
+    const dir_ij = psi_dir[k];
+    const dir_ji = psi_dir[(k + 2) % 4];
+
+    const Jij_old = inCone(tOld, dir_ij, Psi) ? 1 : 0;
+    const Jji = inCone(tj, dir_ji, Psi) ? 1 : 0;
+    const Jij_new = inCone(tNew, dir_ij, Psi) ? 1 : 0;
+
+    const old_ss = -(Jij_old + Jji) * Math.cos(tOld - tj);
+    const new_ss = -(Jij_new + Jji) * Math.cos(tNew - tj);
+
+    const old_sa = -Jij_old * Math.cos(tj - phi_old) - Jji * Math.cos(tOld - phi_j);
+    const new_sa = -Jij_new * Math.cos(tj - phi_old) - Jji * Math.cos(tNew - phi_j);
+
+    dH += (new_ss + new_sa) - (old_ss + old_sa);
+  }
+
+  return dH;
+}
+
+/* ----------------------------
+   Monte Carlo
+---------------------------- */
+function mcSweep(steps) {
+  const Delta = 0.5;
+
+  for (let s = 0; s < steps; s++) {
+    const x = (Math.random() * L) | 0;
+    const y = (Math.random() * L) | 0;
+
+    let tNew = theta[idx(x, y)] + (Math.random() * 2 - 1) * Delta;
+    tNew = ((tNew % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+
+    const dH = deltaH(x, y, tNew);
+    const prob = 0.5 * (1.0 - Math.tanh(dH / (2*T)));
+
+    if (Math.random() < prob) {
+      theta[idx(x, y)] = tNew;
+    }
+  }
+}
+
+/* ----------------------------
+   Rendering
+---------------------------- */
+function hslFromAngle(t) {
+  const h = (t / (2*Math.PI)) * 360;
+  return `hsl(${h.toFixed(1)},80%,55%)`;
+}
+
+function draw() {
+  const { cellW, cellH } = getCellSize();
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < L; i++) {
+    for (let j = 0; j < L; j++) {
+      const t = theta[idx(i, j)];
+
+      const cx = i * cellW + cellW/2;
+      const cy = j * cellH + cellH/2;
+
+      ctx.fillStyle = hslFromAngle(t);
+      ctx.fillRect(i * cellW, j * cellH, cellW, cellH);
+
+      const arrowLen = cellW * 0.38;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.lineWidth = 1.0;
+
+      ctx.beginPath();
+      ctx.moveTo(cx - Math.cos(t)*arrowLen, cy - Math.sin(t)*arrowLen);
+      ctx.lineTo(cx + Math.cos(t)*arrowLen, cy + Math.sin(t)*arrowLen);
+      ctx.stroke();
+
+      const headLen = arrowLen * 0.45;
+
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(t)*arrowLen, cy + Math.sin(t)*arrowLen);
+      ctx.lineTo(cx + Math.cos(t-2.4)*headLen, cy + Math.sin(t-2.4)*headLen);
+      ctx.lineTo(cx + Math.cos(t+2.4)*headLen, cy + Math.sin(t+2.4)*headLen);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fill();
+    }
+  }
+}
+
+/* ----------------------------
+   Stats
+---------------------------- */
+function computeM() {
+  let mx = 0, my = 0;
+
+  for (let i = 0; i < N; i++) {
+    mx += Math.cos(theta[i]);
+    my += Math.sin(theta[i]);
+  }
+
+  mx /= N;
+  my /= N;
+
+  return {
+    mx,
+    my,
+    m: Math.sqrt(mx*mx + my*my)
+  };
+}
+
+function updateStats() {
+  const { mx, my, m } = computeM();
+
+  document.getElementById('st-m').textContent = m.toFixed(3);
+  document.getElementById('st-mx').textContent = mx.toFixed(3);
+  document.getElementById('st-my').textContent = my.toFixed(3);
+  document.getElementById('st-steps').textContent = totalMCSweeps.toLocaleString();
+}
+
+/* ----------------------------
+   Main loop
+---------------------------- */
+let frameCount = 0;
+
+function loop() {
+  if (running) {
+    mcSweep(stepsPerFrame * N);
+    totalMCSweeps += stepsPerFrame;
+
+    draw();
+
+    frameCount++;
+    if (frameCount % 5 === 0) updateStats();
+  }
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+
+/* ----------------------------
+   Controls
+---------------------------- */
+const coneSlider = document.getElementById('sl-cone');
+const coneLabel = document.getElementById('lbl-cone');
+
+document.getElementById('sl-T').addEventListener('input', e => {
+  T = parseFloat(e.target.value);
+  document.getElementById('lbl-T').textContent = T.toFixed(2);
+});
+
+document.getElementById('sl-spd').addEventListener('input', e => {
+  stepsPerFrame = parseInt(e.target.value);
+  document.getElementById('lbl-spd').textContent = stepsPerFrame;
+});
+
+coneSlider.addEventListener('input', e => {
+  cone_deg = parseInt(e.target.value);
+  Psi = (cone_deg * Math.PI / 180) / 2;
+
+  coneLabel.textContent = cone_deg + "°";
+
+  document.querySelectorAll('.cone-tab').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.cone) === cone_deg);
+  });
+});
+
+document.getElementById('btn-play').addEventListener('click', () => {
+  running = !running;
+  document.getElementById('btn-play').textContent = running ? 'Pause' : 'Play';
+});
+
+document.getElementById('btn-init-rand').addEventListener('click', initRandom);
+document.getElementById('btn-init-ord').addEventListener('click', initOrdered);
+
+/* ----------------------------
+   Tabs ↔ slider sync
+---------------------------- */
+document.querySelectorAll('.cone-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.cone-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    cone_deg = parseInt(tab.dataset.cone);
+    Psi = (cone_deg * Math.PI / 180) / 2;
+
+    coneSlider.value = cone_deg;
+    coneLabel.textContent = cone_deg + "°";
+  });
+});
+</script>
