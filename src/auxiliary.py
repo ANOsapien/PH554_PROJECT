@@ -174,7 +174,7 @@ def compute_mxy(theta):
 # =========================
 # MAIN API (MATCH DRIVER)
 # =========================
-
+@njit(cache=True, fastmath=True)
 def run_simulation(L, T, theta_deg, init="disordered"):
     """
     theta_deg : full vision cone angle in degrees.

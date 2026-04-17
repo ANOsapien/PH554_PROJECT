@@ -26,9 +26,9 @@ MODE = args.mode
 # ----------------------------
 
 L = 50
-T_list = np.linspace(0.02, 1, 20)
+T_list = np.linspace(0.75, 0.90, 50)
 cone_list = [306]
-N_RUNS = 1
+N_RUNS = 10
 
 OUTPUT_DIR = f"{MODE}_results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -61,7 +61,7 @@ for theta in cone_list:
                 L=L,
                 T=T,
                 theta_deg=theta,
-                init="disordered"
+                init="ordered"
             )
 
             m_vals.append(out["m"])
