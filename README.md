@@ -2,7 +2,7 @@
 
 Simulation and analysis code for non-reciprocal XY (NRXY) model experiments, including:
 - `selfish` dynamics
-- `auxiliary` dynamics
+- Constrained Hamiltonian or `auxiliary` dynamics
 - a mixed/two-cone variant in `different_vision_cones`
 
 ## Project Structure
@@ -11,13 +11,20 @@ Simulation and analysis code for non-reciprocal XY (NRXY) model experiments, inc
 - `src/auxiliary.py`: Auxiliary NRXY simulation backend.
 - `src/runner.py`: Parameter sweep driver for `selfish` or `auxiliary`.
 - `src/analyze.py`: Post-processing and Tc estimation from JSON outputs.
-- `src/selfish_results/`: Default outputs for selfish runs.
-- `src/auxiliary_results/`: Default outputs for auxiliary runs.
 - `src/different_vision_cones/runner.py`: Driver for two-cone experiments.
 - `src/different_vision_cones/calculate_Tc.py`: Tc estimate utility for two-cone data.
-- `src/different_vision_cones/data.json`: Example data for Tc calculation.
-- `website/nrxy_spin_visualizer.html`: Visualization page.
+- `website/index.html`: Visualization page.
 - `recreate_results.py`: One-command script to run all runner files.
+
+## Website, Presentation, and Papers
+
+- Hosted Website: [https://xynr.vercel.app/](https://xynr.vercel.app/)
+- Presentation:  [literature/PH554_presentation.pdf](literature/PH554_presentation.pdf)
+
+Main papers followed in this implementation:
+- General Hamiltonian description of nonreciprocal interactions, Yu-Bo Shi, Roderich Moessner, Ricard Alert, Marin Bukov: [literature/2505.05246.pdf](literature/2505.05246.pdf)
+- The XY model with vision cone: non-reciprocal vs. reciprocal interactions, Gabriele Bandini, Davide Venturelli, Sarah A. M. Loos, Asja Jelic, Andrea Gambassi (Dated: June 10, 2025): [literature/2412.19297v2.pdf](literature/2412.19297v2.pdf)
+
 
 ## Requirements
 
@@ -40,8 +47,8 @@ python recreate_results.py
 This script runs all runner files and both modes (`selfish`, `auxiliary`) in sequence:
 1. `src/runner.py --mode selfish`
 2. `src/runner.py --mode auxiliary`
-3. `src/different_vision_cones/runner.py --mode selfish`
-4. `src/different_vision_cones/runner.py --mode auxiliary`
+3. `src/different_vision_cones/runner.py --mode selfish --theta_deg2 90 --cone_assign rows`
+4. `src/different_vision_cones/runner.py --mode auxiliary --theta_deg2 90 --cone_assign rows`
 
 Dry run (print commands only):
 
@@ -103,7 +110,6 @@ From `src/different_vision_cones/`:
 python calculate_Tc.py
 ```
 
-By default it reads `data.json` in the same folder.
 
 ## Notes
 
